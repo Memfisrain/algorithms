@@ -2,7 +2,6 @@ const FIELD_SIZE = {x: 8, y: 8};
 
 const isEqual = (start,end) => start.x === end.x && start.y === end.y;
 
-
 const AXIS = {
     X: 'x',
     Y: 'y'
@@ -42,53 +41,31 @@ const getNextSteps = (position, paths) => {
     return filterNextSteps(steps, paths);
 };
 
-
-function countHorseSteps(coords, paths = {}, count = 0) {
+function countHorseSteps(coords) {
     const { start, end } = coords;
+    const queue = [start]
+    const paths = {[serializeStep(start)]: 0};
 
-    paths[serializeStep(start)] = true;
 
+    while (queue.length) {
+        const currentPosition = queue.shift();
+        const currentPositionSerialized = serializeStep(currentPosition);
+        const currentPositionSteps = paths[currentPositionSerialized];
+        
+        if (isEqual(currentPosition, end)) {
+           return currentPositionSteps;
+        }
 
-    if (isEqual(start, end)) {
-        return count;
+        const steps = getNextSteps(currentPosition, paths);
+
+        for (let i = 0; i < steps.length; i++) {
+            queue.push(steps[i]);
+            paths[serializeStep(steps[i])] = currentPositionSteps + 1;
+        }
     }
-
-    count++;
-
-    const steps = getNextSteps(start, paths);
-
-    let min;
-    let curr;
-
-    while (steps.length) {
-        curr = countHorseSteps({start: steps.pop(), end }, paths, count);
-        min = curr
-            ? min
-                ? Math.min(min, curr)
-                : curr
-            : min
-                ?
-                min : null;
-    }
-
-    return min
 }
 
-
 console.log(countHorseSteps({
-    start: { x: 4, y: 4 },
-    end: { x: 8, y: 6 }
+    start: { x: 8, y: 7 },
+    end: { x: 1, y: 7 }
 }));
-/*
-Idea:
-
-You have start and end coords
-
-Check is coords the same
- Yes ? -> true
- No ? ->
-    1) get next possible coords
-    2) make sure previous step is excluded from possible coords
-    3) call countHorseSteps recursively until start and end match
-
- */
